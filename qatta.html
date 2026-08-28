@@ -1,0 +1,1525 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>قطة الاستراحة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@500;700;900&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #f5f7fb;
+    --bg-2: #e9eef6;
+    --surface: #ffffff;
+    --surface-2: #e9eef6;
+    --line: #dbe3ee;
+    --gold: #2e5aa8;
+    --gold-soft: #1f3f7a;
+    --teal: #1791a6;
+    --red: #b8493c;
+    --text: #17212f;
+    --text-dim: #5b6b7f;
+    --text-faint: #9aa8ba;
+    --radius: 18px;
+  }
+  html[data-theme="dark"]{
+    --bg: #0b1220;
+    --bg-2: #131c2e;
+    --surface: #101828;
+    --surface-2: #16223a;
+    --line: #223252;
+    --gold: #6fa1ec;
+    --gold-soft: #a3c3f5;
+    --teal: #35d3e8;
+    --red: #e07665;
+    --text: #eaf1fa;
+    --text-dim: #8fa0b5;
+    --text-faint: #4d5c72;
+  }
+  html{ color-scheme: light; }
+  html[data-theme="dark"]{ color-scheme: dark; }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 50% -10%, var(--surface) 0%, var(--bg) 55%),
+      var(--bg);
+    color:var(--text);
+    font-family:'IBM Plex Sans Arabic', sans-serif;
+    min-height:100vh;
+    padding:28px 16px 60px;
+    transition:background-color .25s ease, color .25s ease;
+  }
+  .wrap{max-width:640px; margin:0 auto;}
+
+  header{text-align:center; margin-bottom:28px; position:relative;}
+  .theme-toggle{
+    position:absolute; top:0; left:0; width:38px; height:38px;
+    border-radius:50%; background:var(--surface); border:1px solid var(--line);
+    display:flex; align-items:center; justify-content:center;
+    font-size:16px; cursor:pointer; box-shadow:0 2px 6px -2px rgba(0,0,0,.15);
+    transition:transform .15s;
+  }
+  .theme-toggle:hover{transform:scale(1.06);}
+
+  .sync-status{
+    font-size:11.5px; color:var(--text-dim); margin-top:12px; font-weight:500;
+  }
+  .sync-status.ok{color:var(--teal);}
+  .sync-status.busy{color:var(--gold-soft);}
+  .sync-status.err{color:var(--red);}
+  header .eyebrow{
+    font-size:12px; color:var(--gold-soft); letter-spacing:1px;
+    text-transform:uppercase; font-weight:600; opacity:.85;
+  }
+  header h1{
+    font-family:'Tajawal', sans-serif; font-weight:900;
+    font-size:34px; margin-top:6px;
+    background:linear-gradient(180deg, var(--text), var(--gold));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  header p{color:var(--text-dim); font-size:14px; margin-top:6px;}
+
+  .share-row{
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    margin-top:14px; flex-wrap:wrap;
+  }
+  .share-btn{
+    background:none; border:1px solid var(--line); color:var(--text-dim);
+    border-radius:999px; padding:6px 14px; font-size:12px; cursor:pointer;
+    font-family:inherit;
+  }
+  .share-btn:hover{color:var(--text); border-color:#c9c0a6;}
+
+  .toast{
+    position:fixed; bottom:22px; left:50%; transform:translateX(-50%) translateY(20px);
+    background:var(--surface-2); border:1px solid var(--line); color:var(--text);
+    padding:10px 18px; border-radius:999px; font-size:13px;
+    opacity:0; pointer-events:none; transition:opacity .25s, transform .25s;
+    box-shadow:0 10px 30px -10px rgba(15,25,42,.22); z-index:50; white-space:nowrap;
+  }
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+
+  .poll-form{display:flex; flex-direction:column; gap:10px;}
+  #pollOptions{display:flex; flex-direction:column; gap:8px;}
+  .poll-form .row{gap:8px;}
+  .poll-form .row .btn{flex:1;}
+
+  .poll-card{
+    background:var(--bg-2); border:1px solid var(--line); border-radius:14px;
+    padding:14px; margin-bottom:12px; animation: pop .3s ease;
+  }
+  .poll-card:last-child{margin-bottom:0;}
+  .poll-q{font-family:'Tajawal',sans-serif; font-weight:700; font-size:14.5px; margin-bottom:10px;}
+  .poll-voter-row{
+    display:flex; align-items:center; gap:8px; margin-bottom:12px; font-size:12.5px;
+  }
+  .poll-voter-row .rm-target{color:var(--text-dim); white-space:nowrap;}
+  .poll-voter-row select{padding:7px 9px; font-size:12.5px;}
+
+  .poll-opt{
+    cursor:pointer; padding:10px 12px; border-radius:10px;
+    background:var(--surface); border:1px solid var(--line);
+    margin-bottom:8px; transition:border-color .15s, background .15s;
+  }
+  .poll-opt:last-child{margin-bottom:0;}
+  .poll-opt:hover{border-color:var(--gold); background:var(--surface-2);}
+  .poll-opt-top{
+    display:flex; align-items:center; justify-content:space-between;
+    font-size:13.5px; margin-bottom:6px;
+  }
+  .poll-opt-text{font-weight:500;}
+  .poll-opt-count{
+    font-family:'Tajawal',sans-serif; font-weight:800; color:var(--gold-soft); font-size:12.5px;
+  }
+  .poll-bar{
+    width:100%; height:5px; border-radius:999px; background:var(--bg);
+    border:1px solid var(--line); overflow:hidden;
+  }
+  .poll-bar-fill{
+    height:100%; border-radius:999px;
+    background:linear-gradient(90deg, var(--teal), var(--gold));
+    transition:width .3s ease;
+  }
+  .poll-voters{font-size:11px; color:var(--text-dim); margin-top:6px;}
+
+  .alert-banner{
+    display:flex; flex-wrap:wrap; gap:8px; justify-content:center;
+    margin-bottom:22px;
+  }
+  .alert-pill{
+    font-size:12px; font-weight:700; padding:8px 14px; border-radius:999px;
+    font-family:'Tajawal',sans-serif; display:flex; align-items:center; gap:6px;
+    border:1px solid transparent;
+  }
+  .alert-pill.soon{background:rgba(46,90,168,.13); color:var(--gold-soft); border-color:rgba(46,90,168,.3);}
+  .alert-pill.late{background:rgba(184,73,60,.13); color:var(--red); border-color:rgba(184,73,60,.3);}
+
+  /* --- Majlis circle hero --- */
+  .majlis{
+    position:relative;
+    width:min(420px, 90vw);
+    height:min(420px, 90vw);
+    margin:8px auto 34px;
+  }
+  .rug{
+    position:absolute; inset:0; border-radius:50%;
+    background:
+      repeating-conic-gradient(from 0deg, rgba(46,90,168,.09) 0deg 8deg, transparent 8deg 16deg),
+      radial-gradient(circle, var(--surface) 0%, var(--surface-2) 70%, var(--bg) 100%);
+    border:1px solid var(--line);
+  }
+  .rug::before{
+    content:''; position:absolute; inset:14%; border-radius:50%;
+    border:1px dashed rgba(46,90,168,.35);
+  }
+  .pot{
+    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+    width:150px; height:150px; border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, var(--surface-2), var(--surface) 70%);
+    border:1px solid var(--line);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    box-shadow:0 0 0 6px rgba(46,90,168,.08), 0 20px 40px -16px rgba(15,25,42,.16);
+    text-align:center;
+    animation: rise .6s ease;
+  }
+  .pot .lbl{font-size:11px; color:var(--text-dim); font-weight:500;}
+  .pot .amt{font-family:'Tajawal',sans-serif; font-weight:900; font-size:26px; color:var(--gold-soft); margin-top:2px;}
+  .pot .sub{font-size:10.5px; color:var(--text-dim); margin-top:4px;}
+
+  .seat{
+    position:absolute; width:60px; height:60px;
+    display:flex; align-items:center; justify-content:center;
+    transform:translate(-50%,-50%);
+  }
+  .avatar{
+    width:52px; height:52px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Tajawal',sans-serif; font-weight:700; font-size:16px;
+    background:var(--surface); border:1.5px solid var(--line);
+    color:var(--text); position:relative;
+    box-shadow:0 4px 10px -6px rgba(15,25,42,.25);
+    animation: pop .35s ease;
+  }
+  .avatar.pos{border-color:var(--teal); box-shadow:0 0 0 3px rgba(23,145,166,.15);}
+  .avatar.neg{border-color:var(--red); box-shadow:0 0 0 3px rgba(184,73,60,.15);}
+  .avatar .tag{
+    position:absolute; bottom:-18px; left:50%; transform:translateX(-50%);
+    font-size:10px; white-space:nowrap; color:var(--text-dim);
+  }
+  .empty-hint{
+    position:absolute; top:50%; left:50%; transform:translate(-50%, 110px);
+    font-size:12px; color:var(--text-dim); width:80%; text-align:center;
+  }
+
+  @keyframes pop{ from{opacity:0; transform:translate(-50%,-50%) scale(.5);} to{opacity:1; transform:translate(-50%,-50%) scale(1);} }
+  @keyframes rise{ from{opacity:0; transform:translate(-50%,-50%) scale(.85);} to{opacity:1; transform:translate(-50%,-50%) scale(1);} }
+
+  /* --- cards --- */
+  .card{
+    background:var(--surface); border:1px solid var(--line);
+    border-radius:var(--radius); padding:18px; margin-bottom:16px;
+    box-shadow:0 1px 2px rgba(15,25,42,.03), 0 10px 24px -18px rgba(15,25,42,.18);
+  }
+  .card h2{
+    font-family:'Tajawal',sans-serif; font-size:16px; font-weight:700;
+    margin-bottom:14px; display:flex; align-items:center; gap:8px;
+  }
+  .card h2 .dot{width:7px; height:7px; border-radius:50%; background:var(--gold);}
+
+  .row{display:flex; gap:10px;}
+  input, select{
+    width:100%; background:var(--bg-2); border:1px solid var(--line);
+    color:var(--text); border-radius:10px; padding:11px 12px;
+    font-family:inherit; font-size:14px; outline:none;
+    transition:border-color .15s;
+  }
+  input:focus, select:focus{border-color:var(--gold);}
+  input::placeholder{color:var(--text-faint);}
+
+  .btn{
+    background:var(--gold); color:#fff; border:none; border-radius:10px;
+    padding:11px 18px; font-weight:700; font-size:14px; cursor:pointer;
+    font-family:'Tajawal',sans-serif; white-space:nowrap;
+    transition:filter .15s, transform .1s;
+  }
+  .btn:hover{filter:brightness(1.08);}
+  .btn:active{transform:scale(.97);}
+  .btn.ghost{
+    background:transparent; color:var(--text-dim); border:1px solid var(--line);
+    font-family:inherit; font-weight:500; padding:6px 12px; font-size:12.5px;
+  }
+  .btn.ghost:hover{color:var(--text); border-color:#c9c0a6;}
+  .btn:disabled{opacity:.4; cursor:not-allowed;}
+
+  .expense-form{display:flex; flex-direction:column; gap:10px;}
+  .expense-form .row2{display:flex; gap:10px;}
+  .expense-form .row2 > *{flex:1;}
+
+  .exp-item{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:11px 4px; border-bottom:1px solid var(--line);
+    font-size:13.5px; animation: pop .3s ease;
+  }
+  .exp-item:last-child{border-bottom:none;}
+  .exp-item .who{
+    width:30px; height:30px; border-radius:50%; background:var(--surface-2);
+    display:flex; align-items:center; justify-content:center;
+    font-size:12px; font-weight:700; font-family:'Tajawal',sans-serif;
+    flex-shrink:0;
+  }
+  .exp-item .mid{flex:1; margin:0 10px; overflow:hidden;}
+  .exp-item .desc{color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .exp-item .payer{color:var(--text-dim); font-size:11.5px;}
+  .exp-item .amt{font-family:'Tajawal',sans-serif; font-weight:700; color:var(--gold-soft); flex-shrink:0;}
+  .exp-item .del{
+    background:none; border:none; color:var(--text-faint); cursor:pointer; font-size:16px;
+    margin-right:8px; line-height:1; flex-shrink:0;
+  }
+  .exp-item .del:hover{color:var(--red);}
+
+  .receipt-row{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+  .receipt-preview{display:flex; align-items:center; gap:8px;}
+  .receipt-preview:empty{display:none;}
+  .receipt-thumb-wrap{position:relative; width:44px; height:44px;}
+  .receipt-thumb{
+    width:44px; height:44px; object-fit:cover; border-radius:8px;
+    border:1px solid var(--line);
+  }
+  .receipt-remove{
+    position:absolute; top:-6px; left:-6px; width:18px; height:18px;
+    border-radius:50%; background:var(--red); color:#fff; border:none;
+    font-size:12px; line-height:1; cursor:pointer; display:flex;
+    align-items:center; justify-content:center;
+  }
+  .exp-receipt-btn{
+    background:none; border:none; cursor:pointer; font-size:15px;
+    margin-inline-end:6px; flex-shrink:0; line-height:1;
+  }
+
+  .lightbox{
+    display:none; position:fixed; inset:0; background:rgba(10,15,25,.85);
+    z-index:100; align-items:center; justify-content:center; padding:24px;
+  }
+  .lightbox.show{display:flex;}
+  .lightbox img{
+    max-width:100%; max-height:100%; border-radius:12px;
+    box-shadow:0 20px 50px -10px rgba(0,0,0,.5);
+  }
+
+  .empty{color:var(--text-dim); font-size:13px; text-align:center; padding:14px 0;}
+
+  .settle-item{
+    display:flex; align-items:center; gap:10px; padding:12px 0;
+    border-bottom:1px solid var(--line); font-size:14px;
+  }
+  .settle-item:last-child{border-bottom:none;}
+  .settle-item .arrow{color:var(--gold-soft); font-size:16px;}
+  .settle-item b{font-family:'Tajawal',sans-serif;}
+  .settle-item .val{margin-inline-start:auto; font-family:'Tajawal',sans-serif; font-weight:800; color:var(--gold-soft);}
+  .settled-note{
+    display:flex; align-items:center; gap:8px; color:var(--teal); font-size:13.5px;
+    padding:6px 0;
+  }
+
+  .member-chip{
+    display:inline-flex; align-items:center; gap:6px;
+    background:var(--surface-2); border:1px solid var(--line);
+    padding:6px 6px 6px 12px; border-radius:999px; font-size:13px; margin:4px 6px 0 0;
+  }
+  .member-chip button{
+    background:none; border:none; color:var(--text-faint); cursor:pointer; font-size:14px;
+    width:20px; height:20px; border-radius:50%;
+  }
+  .member-chip button:hover{color:var(--red); background:rgba(184,73,60,.1);}
+
+  .rent-box{
+    display:flex; align-items:center; justify-content:space-between;
+    background:var(--bg-2); border:1px solid var(--line); border-radius:12px;
+    padding:12px 14px; gap:10px; flex-wrap:wrap;
+  }
+  .rent-box .r-amt{font-family:'Tajawal',sans-serif; font-weight:800; font-size:18px; color:var(--gold-soft);}
+  .rent-box .r-sub{font-size:12px; color:var(--text-dim); margin-top:3px;}
+  .rent-badge{
+    font-size:11.5px; font-weight:700; padding:5px 11px; border-radius:999px;
+    font-family:'Tajawal',sans-serif; white-space:nowrap;
+  }
+  .rent-badge.ok{background:rgba(23,145,166,.12); color:var(--teal);}
+  .rent-badge.soon{background:rgba(46,90,168,.15); color:var(--gold-soft);}
+  .rent-badge.late{background:rgba(184,73,60,.15); color:var(--red);}
+  .rent-badge.paid{background:rgba(23,145,166,.15); color:var(--teal);}
+  .rent-actions{display:flex; align-items:center; gap:8px; margin-top:10px;}
+  .rent-actions select{flex:1;}
+
+  .rent-progress{margin-top:12px;}
+  .rp-bar{
+    width:100%; height:6px; border-radius:999px; background:var(--bg-2);
+    border:1px solid var(--line); overflow:hidden;
+  }
+  .rp-fill{
+    height:100%; border-radius:999px;
+    background:linear-gradient(90deg, var(--gold), var(--teal));
+    transition:width .3s ease;
+  }
+  .rp-text{font-size:11.5px; color:var(--text-dim); margin-top:6px;}
+
+  .rent-members{margin-top:12px; display:flex; flex-direction:column; gap:8px;}
+  .rm-caption{font-size:12px; color:var(--text-dim); margin-bottom:2px;}
+  .rent-member-row{
+    display:flex; align-items:center; gap:10px;
+    background:var(--bg-2); border:1px solid var(--line); border-radius:10px;
+    padding:8px 10px;
+  }
+  .rent-member-row .rm-name{
+    font-family:'Tajawal',sans-serif; font-weight:700; font-size:13.5px;
+    flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  .rent-member-row .rm-target{font-size:11px; color:var(--text-dim); white-space:nowrap;}
+  .rm-input-wrap{
+    display:flex; align-items:center; gap:6px; flex-shrink:0;
+    background:var(--bg); border:1px solid var(--line); border-radius:8px;
+    padding:0 8px;
+  }
+  .rm-input-wrap .rm-input{
+    width:88px; border:none; background:none; padding:7px 2px; font-size:13px; text-align:center;
+  }
+  .rm-input-wrap .rm-input:focus{outline:none;}
+  .rm-input-wrap .rm-unit{font-size:11px; color:var(--text-dim); flex-shrink:0;}
+
+  footer{text-align:center; margin-top:8px;}
+  footer button{
+    background:none; border:none; color:var(--text-faint); font-size:12px; cursor:pointer;
+    text-decoration:underline; font-family:inherit;
+  }
+  footer button:hover{color:var(--red);}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none !important; transition:none !important;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" aria-label="تبديل الوضع الداكن والفاتح">🌙</button>
+    <div class="eyebrow">حساب مشترك</div>
+    <h1>قطة الاستراحة</h1>
+    <p>وزّعوا المصاريف بالعدل، وخلّوا الحساب واضح بينكم</p>
+    <div class="sync-status" id="syncStatus">● جاري الاتصال بقاعدة البيانات…</div>
+    <div class="share-row">
+      <button class="share-btn" onclick="exportExcel()">📊 تصدير Excel</button>
+      <button class="share-btn" onclick="enableNotifications()">🔔 فعّل التنبيهات</button>
+    </div>
+  </header>
+
+  <div class="alert-banner" id="alertBanner" style="display:none;"></div>
+
+  <div class="majlis" id="majlis">
+    <div class="rug"></div>
+    <div class="pot">
+      <div class="lbl">إجمالي المصروفات</div>
+      <div class="amt" id="totalAmt">٠</div>
+      <div class="sub" id="perShare">نصيب الفرد: ٠</div>
+    </div>
+    <!-- seats injected by JS -->
+  </div>
+
+  <div class="card">
+    <h2><span class="dot"></span>الأعضاء</h2>
+    <div class="row">
+      <input id="memberInput" type="text" placeholder="اسم العضو…" maxlength="20">
+      <button class="btn" onclick="addMember()">🔒 إضافة</button>
+    </div>
+    <div class="r-sub" style="margin-top:8px;">إضافة الأعضاء تحتاج رمز مدير الاستراحة</div>
+    <div id="memberChips" style="margin-top:12px;"></div>
+  </div>
+
+  <div class="card">
+    <h2><span class="dot"></span>حسابي</h2>
+    <div class="row">
+      <select id="myAccountSelect" onchange="renderMyAccount()"></select>
+    </div>
+    <div id="myAccountInfo" style="margin-top:14px;"></div>
+
+    <div style="margin-top:18px; border-top:1px solid var(--line); padding-top:14px;">
+      <div class="rm-caption" style="margin-bottom:8px;">تذكيراتي الشخصية (تُحفظ على هالجهاز فقط)</div>
+      <div class="row">
+        <input id="reminderText" type="text" placeholder="نص التذكير…" maxlength="60">
+        <input id="reminderDate" type="date">
+      </div>
+      <button class="btn ghost" style="margin-top:8px;" onclick="addPersonalReminder()">+ إضافة تذكير</button>
+      <div id="reminderList" style="margin-top:10px;"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="dot"></span>القطة الشهرية</h2>
+    <div class="expense-form">
+      <div class="row2">
+        <input id="kittyAmount" type="text" inputmode="decimal" placeholder="قيمة القطة الشهرية (ر.س)">
+        <select id="kittyDay"></select>
+      </div>
+      <button class="btn" onclick="saveKitty()">حفظ بيانات القطة الشهرية</button>
+    </div>
+    <div id="kittyInfo" style="margin-top:14px;"></div>
+  </div>
+
+  <div class="card">
+    <h2><span class="dot"></span>الإيجار السنوي</h2>
+    <div class="expense-form">
+      <div class="row2">
+        <input id="rentAmount" type="text" inputmode="decimal" placeholder="قيمة الإيجار (ر.س)">
+        <input id="rentDate" type="date">
+      </div>
+      <button class="btn" onclick="saveRent()">حفظ بيانات الإيجار</button>
+    </div>
+    <div id="rentInfo" style="margin-top:14px;"></div>
+  </div>
+
+  <div class="card">
+    <h2><span class="dot"></span>إضافة مصروف</h2>
+    <div class="expense-form">
+      <input id="expDesc" type="text" placeholder="وش كان المصروف؟ (مثال: عشاء، فحم، حليب)" maxlength="40">
+      <div class="row2">
+        <select id="expPayer"></select>
+        <input id="expAmount" type="text" inputmode="decimal" placeholder="المبلغ (ر.س)">
+      </div>
+      <div class="receipt-row">
+        <input type="file" id="expReceiptInput" accept="image/*" capture="environment" style="display:none" onchange="handleReceiptSelect(event)">
+        <button type="button" class="btn ghost" onclick="document.getElementById('expReceiptInput').click()">📷 إرفاق صورة الفاتورة</button>
+        <div id="receiptPreview" class="receipt-preview"></div>
+      </div>
+      <button class="btn" onclick="addExpense()">تسجيل المصروف</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="dot"></span>سجل المصاريف</h2>
+    <div id="expList"><div class="empty">ما فيه مصاريف مسجلة بعد</div></div>
+  </div>
+
+  <div class="card">
+    <h2><span class="dot"></span>تصويت بين الأعضاء</h2>
+    <div class="poll-form">
+      <input id="pollQuestion" type="text" placeholder="السؤال… (مثال: وين نروح نهاية الأسبوع؟)" maxlength="80">
+      <div id="pollOptions">
+        <input class="poll-opt-input" type="text" placeholder="الخيار ١" maxlength="30">
+        <input class="poll-opt-input" type="text" placeholder="الخيار ٢" maxlength="30">
+      </div>
+      <div class="row">
+        <button class="btn ghost" onclick="addPollOptionField()">+ إضافة خيار</button>
+        <button class="btn" onclick="createPoll()">إنشاء تصويت</button>
+      </div>
+    </div>
+    <div id="pollList" style="margin-top:16px;"></div>
+  </div>
+
+  <footer>
+    <button onclick="resetAll()">تصفير كل البيانات</button>
+  </footer>
+
+  <div id="toast" class="toast"></div>
+
+  <div class="lightbox" id="lightbox" onclick="closeReceipt()">
+    <img id="lightboxImg" src="" alt="صورة الفاتورة">
+  </div>
+
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js" onerror="window.__fbLoadFailed=true"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js" onerror="window.__fbLoadFailed=true"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" onerror="window.__xlsxLoadFailed=true"></script>
+<script>
+let members = [];   // {id, name}
+let expenses = [];  // {id, memberId, desc, amount}
+let rent = null;    // {amount, dueDate, payments}
+let monthlyKitty = null; // {amount, dueDay, payments, cycleMonth}
+let polls = [];     // {id, question, options:[{id, text, votes:[memberId,...]}]}
+let nextId = 1;
+
+function fmt(n){
+  return new Intl.NumberFormat('ar-SA', {maximumFractionDigits: 2}).format(n);
+}
+function normalizeDigits(str){
+  if(str === null || str === undefined) return str;
+  const arabicIndic = '٠١٢٣٤٥٦٧٨٩';
+  const persian = '۰۱۲۳۴۵۶۷۸۹';
+  return String(str).replace(/[٠-٩۰-۹]/g, c => {
+    let idx = arabicIndic.indexOf(c);
+    if(idx > -1) return idx;
+    idx = persian.indexOf(c);
+    if(idx > -1) return idx;
+    return c;
+  });
+}
+function parseAmount(value){
+  return parseFloat(normalizeDigits(value));
+}
+function initials(name){
+  return name.trim().slice(0,2);
+}
+function escapeHtml(str){
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+const ADMIN_PIN = '2580';
+
+function checkAdminPin(){
+  const pin = prompt('أدخل الرمز السري لمدير الاستراحة:');
+  if(pin === null) return false;
+  if(normalizeDigits(pin.trim()) !== ADMIN_PIN){
+    showToast('الرمز السري غير صحيح');
+    return false;
+  }
+  return true;
+}
+
+function addMember(){
+  const input = document.getElementById('memberInput');
+  const name = input.value.trim();
+  if(!name){
+    showToast('اكتب اسم العضو أول');
+    return;
+  }
+  if(!checkAdminPin()) return;
+  members.push({id: nextId++, name});
+  input.value = '';
+  renderAll();
+  pushState();
+}
+
+function removeMember(id){
+  if(!checkAdminPin()) return;
+  members = members.filter(m => m.id !== id);
+  expenses = expenses.filter(e => e.memberId !== id);
+  polls.forEach(p => p.options.forEach(o => { o.votes = (o.votes || []).filter(v => v !== id); }));
+  renderAll();
+  pushState();
+}
+
+let pendingReceipt = null;
+
+function compressImage(file){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        const maxDim = 1000;
+        let w = img.width, h = img.height;
+        if(w > maxDim || h > maxDim){
+          if(w > h){ h = Math.round(h * maxDim / w); w = maxDim; }
+          else { w = Math.round(w * maxDim / h); h = maxDim; }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', 0.6));
+      };
+      img.onerror = () => reject(new Error('تعذرت قراءة الصورة'));
+      img.src = e.target.result;
+    };
+    reader.onerror = () => reject(new Error('تعذرت قراءة الملف'));
+    reader.readAsDataURL(file);
+  });
+}
+
+async function handleReceiptSelect(event){
+  const file = event.target.files[0];
+  if(!file) return;
+  try{
+    pendingReceipt = await compressImage(file);
+    const prev = document.getElementById('receiptPreview');
+    prev.innerHTML = `
+      <div class="receipt-thumb-wrap">
+        <img src="${pendingReceipt}" class="receipt-thumb">
+        <button type="button" class="receipt-remove" onclick="clearPendingReceipt()">×</button>
+      </div>`;
+  }catch(e){
+    showToast('تعذر تحميل الصورة');
+  }
+}
+
+function clearPendingReceipt(){
+  pendingReceipt = null;
+  const input = document.getElementById('expReceiptInput');
+  if(input) input.value = '';
+  const prev = document.getElementById('receiptPreview');
+  if(prev) prev.innerHTML = '';
+}
+
+function openReceipt(expenseId){
+  const exp = expenses.find(e => e.id === expenseId);
+  if(!exp || !exp.receipt) return;
+  document.getElementById('lightboxImg').src = exp.receipt;
+  document.getElementById('lightbox').classList.add('show');
+}
+
+function closeReceipt(){
+  document.getElementById('lightbox').classList.remove('show');
+}
+
+function addExpense(){
+  const desc = document.getElementById('expDesc').value.trim();
+  const payerId = Number(document.getElementById('expPayer').value);
+  const amount = parseAmount(document.getElementById('expAmount').value);
+  if(!desc || !payerId || !amount || amount <= 0) return;
+  const expense = {id: nextId++, memberId: payerId, desc, amount};
+  if(pendingReceipt) expense.receipt = pendingReceipt;
+  expenses.push(expense);
+  document.getElementById('expDesc').value = '';
+  document.getElementById('expAmount').value = '';
+  clearPendingReceipt();
+  renderAll();
+  pushState();
+}
+
+function removeExpense(id){
+  if(!checkAdminPin()) return;
+  expenses = expenses.filter(e => e.id !== id);
+  renderAll();
+  pushState();
+}
+
+function saveRent(){
+  if(!checkAdminPin()) return;
+  const amount = parseAmount(document.getElementById('rentAmount').value);
+  const dueDate = document.getElementById('rentDate').value;
+  if(!amount || amount <= 0 || !dueDate) return;
+  const prevPayments = rent ? rent.payments : {};
+  rent = {amount, dueDate, payments: prevPayments};
+  document.getElementById('rentAmount').value = '';
+  document.getElementById('rentDate').value = '';
+  renderAll();
+  pushState();
+}
+
+function setRentPayment(memberId, value){
+  if(!rent) return;
+  const amt = parseAmount(value);
+  if(!amt || amt <= 0){
+    delete rent.payments[memberId];
+  } else {
+    rent.payments[memberId] = amt;
+  }
+  renderAll();
+  pushState();
+}
+
+function deleteRent(){
+  if(!checkAdminPin()) return;
+  if(!confirm('تحذف بيانات الإيجار؟')) return;
+  rent = null;
+  renderAll();
+  pushState();
+}
+
+/* ---- monthly kitty ---- */
+function daysInMonth(y, m){ return new Date(y, m+1, 0).getDate(); }
+function currentMonthKey(){
+  const n = new Date();
+  return n.getFullYear() + '-' + String(n.getMonth()+1).padStart(2,'0');
+}
+function monthlyDueDate(){
+  const now = new Date();
+  const day = Math.min(monthlyKitty.dueDay, daysInMonth(now.getFullYear(), now.getMonth()));
+  return new Date(now.getFullYear(), now.getMonth(), day);
+}
+function populateKittyDaySelect(){
+  const sel = document.getElementById('kittyDay');
+  if(sel.options.length) return;
+  for(let d = 1; d <= 28; d++){
+    const opt = document.createElement('option');
+    opt.value = d;
+    opt.textContent = 'يوم ' + d + ' من كل شهر';
+    sel.appendChild(opt);
+  }
+}
+function saveKitty(){
+  if(!checkAdminPin()) return;
+  const amount = parseAmount(document.getElementById('kittyAmount').value);
+  const dueDay = Number(document.getElementById('kittyDay').value);
+  if(!amount || amount <= 0 || !dueDay) return;
+  const keepPayments = (monthlyKitty && monthlyKitty.cycleMonth === currentMonthKey()) ? monthlyKitty.payments : {};
+  monthlyKitty = {amount, dueDay, payments: keepPayments, cycleMonth: currentMonthKey()};
+  document.getElementById('kittyAmount').value = '';
+  renderAll();
+  pushState();
+}
+function setKittyPayment(memberId, value){
+  if(!monthlyKitty) return;
+  const amt = parseAmount(value);
+  if(!amt || amt <= 0){
+    delete monthlyKitty.payments[memberId];
+  } else {
+    monthlyKitty.payments[memberId] = amt;
+  }
+  renderAll();
+  pushState();
+}
+function startNewKittyCycle(){
+  if(!checkAdminPin()) return;
+  if(!monthlyKitty) return;
+  monthlyKitty.payments = {};
+  monthlyKitty.cycleMonth = currentMonthKey();
+  renderAll();
+  pushState();
+}
+function deleteKitty(){
+  if(!checkAdminPin()) return;
+  if(!confirm('تحذف بيانات القطة الشهرية؟')) return;
+  monthlyKitty = null;
+  renderAll();
+  pushState();
+}
+function renderKitty(){
+  const box = document.getElementById('kittyInfo');
+  if(!monthlyKitty){
+    box.innerHTML = '';
+    return;
+  }
+  const due = monthlyDueDate();
+  const today = new Date(); today.setHours(0,0,0,0);
+  const diff = Math.round((due - today) / 86400000);
+  const dueLabel = due.toLocaleDateString('ar-SA-u-ca-gregory', {year:'numeric', month:'long', day:'numeric'});
+  const perShare = members.length ? monthlyKitty.amount / members.length : monthlyKitty.amount;
+  const paidTotal = Object.values(monthlyKitty.payments || {}).reduce((s,v) => s+v, 0);
+  const remaining = monthlyKitty.amount - paidTotal;
+  const complete = remaining <= 0.5;
+  const isNewCycle = monthlyKitty.cycleMonth !== currentMonthKey();
+
+  let badge;
+  if(complete){
+    badge = `<span class="rent-badge paid">✓ اكتمل السداد</span>`;
+  } else if(diff < 0){
+    badge = `<span class="rent-badge late">متأخرة ${fmt(Math.abs(diff))} يوم</span>`;
+  } else if(diff <= 5){
+    badge = `<span class="rent-badge soon">باقي ${fmt(diff)} يوم</span>`;
+  } else {
+    badge = `<span class="rent-badge ok">باقي ${fmt(diff)} يوم</span>`;
+  }
+
+  const memberRows = members.length ? `
+    <div class="rm-caption">كم دفع كل عضو من القطة هالشهر؟</div>
+    ${members.map(m => `
+    <div class="rent-member-row">
+      <span class="rm-name">${m.name}</span>
+      <span class="rm-target">من أصل ${fmt(perShare)}</span>
+      <div class="rm-input-wrap">
+        <input type="text" inputmode="decimal" class="rm-input"
+          value="${monthlyKitty.payments[m.id] || ''}" placeholder="المبلغ المدفوع"
+          onchange="setKittyPayment(${m.id}, this.value)">
+        <span class="rm-unit">ر.س</span>
+      </div>
+    </div>
+  `).join('')}` : `<div class="r-sub" style="margin-top:6px;">أضيفوا أعضاء عشان توزّعوا القطة عليهم</div>`;
+
+  box.innerHTML = `
+    <div class="rent-box">
+      <div>
+        <div class="r-amt">${fmt(monthlyKitty.amount)} ر.س / شهريًا</div>
+        <div class="r-sub">استحقاق هالشهر: ${dueLabel} · نصيب الفرد: ${fmt(perShare)}</div>
+      </div>
+      ${badge}
+    </div>
+    <div class="rent-progress">
+      <div class="rp-bar"><div class="rp-fill" style="width:${Math.min(100, (paidTotal/monthlyKitty.amount)*100)}%"></div></div>
+      <div class="rp-text">تم دفع ${fmt(paidTotal)} ${remaining > 0.5 ? '· متبقي ' + fmt(remaining) : ''}</div>
+    </div>
+    ${isNewCycle ? `<div class="r-sub" style="margin-top:8px; color:var(--gold-soft);">بدأ شهر جديد — اضغط "بدء دورة جديدة" عشان تصفّر المدفوعات</div>` : ''}
+    <div class="rent-members">${memberRows}</div>
+    <div style="display:flex; justify-content:space-between; margin-top:10px;">
+      <button class="btn ghost" onclick="startNewKittyCycle()">بدء دورة جديدة</button>
+      <button class="btn ghost" onclick="deleteKitty()">حذف بيانات القطة الشهرية</button>
+    </div>
+  `;
+}
+
+function addPollOptionField(){
+  const wrap = document.getElementById('pollOptions');
+  const count = wrap.querySelectorAll('.poll-opt-input').length;
+  if(count >= 6) return;
+  const input = document.createElement('input');
+  input.className = 'poll-opt-input';
+  input.type = 'text';
+  input.maxLength = 30;
+  input.placeholder = 'الخيار ' + (count + 1);
+  wrap.appendChild(input);
+}
+
+function createPoll(){
+  const q = document.getElementById('pollQuestion').value.trim();
+  const optionTexts = Array.from(document.querySelectorAll('.poll-opt-input'))
+    .map(i => i.value.trim())
+    .filter(Boolean);
+  if(!q || optionTexts.length < 2) return;
+  if(!checkAdminPin()) return;
+  polls.push({
+    id: nextId++,
+    question: q,
+    options: optionTexts.map(text => ({id: nextId++, text, votes: []}))
+  });
+  document.getElementById('pollQuestion').value = '';
+  document.getElementById('pollOptions').innerHTML = `
+    <input class="poll-opt-input" type="text" placeholder="الخيار ١" maxlength="30">
+    <input class="poll-opt-input" type="text" placeholder="الخيار ٢" maxlength="30">
+  `;
+  renderAll();
+  pushState();
+}
+
+function castVote(pollId, optionId){
+  const poll = polls.find(p => p.id === pollId);
+  if(!poll) return;
+  const sel = document.getElementById('voter-' + pollId);
+  if(!sel || !sel.value) return;
+  const voterId = Number(sel.value);
+  const target = poll.options.find(o => o.id === optionId);
+  const wasVoted = (target.votes || []).includes(voterId);
+  poll.options.forEach(o => { o.votes = (o.votes || []).filter(v => v !== voterId); });
+  if(!wasVoted) target.votes.push(voterId);
+  renderAll();
+  pushState();
+}
+
+function deletePoll(id){
+  if(!checkAdminPin()) return;
+  polls = polls.filter(p => p.id !== id);
+  renderAll();
+  pushState();
+}
+
+function renderPolls(){
+  const box = document.getElementById('pollList');
+  if(members.length === 0){
+    box.innerHTML = '<div class="empty">أضيفوا أعضاء أول عشان يقدروا يصوّتوا</div>';
+    return;
+  }
+  if(polls.length === 0){
+    box.innerHTML = '<div class="empty">ما فيه تصويتات حالياً</div>';
+    return;
+  }
+  const memberOptions = members.map(m => `<option value="${m.id}">${m.name}</option>`).join('');
+  box.innerHTML = polls.slice().reverse().map(p => {
+    const totalVotes = p.options.reduce((s,o) => s + (o.votes || []).length, 0);
+    const optionsHtml = p.options.map(o => {
+      const votes = o.votes || [];
+      const count = votes.length;
+      const pct = totalVotes ? Math.round(count/totalVotes*100) : 0;
+      const voterNames = votes.map(vid => escapeHtml(memberName(vid))).join('، ');
+      return `
+        <div class="poll-opt" onclick="castVote(${p.id}, ${o.id})">
+          <div class="poll-opt-top">
+            <span class="poll-opt-text">${escapeHtml(o.text)}</span>
+            <span class="poll-opt-count">${count}</span>
+          </div>
+          <div class="poll-bar"><div class="poll-bar-fill" style="width:${pct}%"></div></div>
+          ${voterNames ? `<div class="poll-voters">${voterNames}</div>` : ''}
+        </div>`;
+    }).join('');
+    return `
+      <div class="poll-card">
+        <div class="poll-q">${escapeHtml(p.question)}</div>
+        <div class="poll-voter-row">
+          <span class="rm-target">صوّت باسم:</span>
+          <select id="voter-${p.id}">${memberOptions}</select>
+        </div>
+        ${optionsHtml}
+        <div style="text-align:left; margin-top:8px;">
+          <button class="btn ghost" onclick="deletePoll(${p.id})">حذف التصويت</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function rentCountdown(dueDateStr){
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  const due = new Date(dueDateStr);
+  const diffDays = Math.round((due - today) / 86400000);
+  return diffDays;
+}
+
+function renderRent(){
+  const box = document.getElementById('rentInfo');
+  if(!rent){
+    box.innerHTML = '';
+    return;
+  }
+  const diff = rentCountdown(rent.dueDate);
+  const dueLabel = new Date(rent.dueDate).toLocaleDateString('ar-SA-u-ca-gregory', {year:'numeric', month:'long', day:'numeric'});
+  const perShare = members.length ? rent.amount / members.length : rent.amount;
+  const paidTotal = Object.values(rent.payments || {}).reduce((s,v) => s+v, 0);
+  const remaining = rent.amount - paidTotal;
+  const complete = remaining <= 0.5;
+
+  let badge;
+  if(complete){
+    badge = `<span class="rent-badge paid">✓ اكتمل السداد</span>`;
+  } else if(diff < 0){
+    badge = `<span class="rent-badge late">متأخر ${fmt(Math.abs(diff))} يوم</span>`;
+  } else if(diff <= 30){
+    badge = `<span class="rent-badge soon">باقي ${fmt(diff)} يوم</span>`;
+  } else {
+    badge = `<span class="rent-badge ok">باقي ${fmt(diff)} يوم</span>`;
+  }
+
+  const memberRows = members.length ? `
+    <div class="rm-caption">كم دفع كل عضو من الإيجار؟</div>
+    ${members.map(m => `
+    <div class="rent-member-row">
+      <span class="rm-name">${m.name}</span>
+      <span class="rm-target">من أصل ${fmt(perShare)}</span>
+      <div class="rm-input-wrap">
+        <input type="text" inputmode="decimal" class="rm-input"
+          value="${rent.payments[m.id] || ''}" placeholder="المبلغ المدفوع"
+          onchange="setRentPayment(${m.id}, this.value)">
+        <span class="rm-unit">ر.س</span>
+      </div>
+    </div>
+  `).join('')}` : `<div class="r-sub" style="margin-top:6px;">أضيفوا أعضاء عشان توزّعوا الإيجار عليهم</div>`;
+
+  box.innerHTML = `
+    <div class="rent-box">
+      <div>
+        <div class="r-amt">${fmt(rent.amount)} ر.س</div>
+        <div class="r-sub">الاستحقاق: ${dueLabel} · نصيب الفرد: ${fmt(perShare)}</div>
+      </div>
+      ${badge}
+    </div>
+    <div class="rent-progress">
+      <div class="rp-bar"><div class="rp-fill" style="width:${Math.min(100, (paidTotal/rent.amount)*100)}%"></div></div>
+      <div class="rp-text">تم دفع ${fmt(paidTotal)} ${remaining > 0.5 ? '· متبقي ' + fmt(remaining) : ''}</div>
+    </div>
+    <div class="rent-members">${memberRows}</div>
+    <div style="text-align:left; margin-top:10px;">
+      <button class="btn ghost" onclick="deleteRent()">حذف بيانات الإيجار</button>
+    </div>
+  `;
+}
+
+function resetAll(){
+  if(!checkAdminPin()) return;
+  if(!confirm('متأكد تبي تصفّر كل الأعضاء والمصاريف والتصويتات؟ هذا يمسحها عند كل الأعضاء.')) return;
+  members = [];
+  expenses = [];
+  rent = null;
+  monthlyKitty = null;
+  polls = [];
+  nextId = 1;
+  renderAll();
+  pushState();
+}
+
+function computeBalances(){
+  const rentTotal = rent ? rent.amount : 0;
+  const kittyTotal = monthlyKitty ? monthlyKitty.amount : 0;
+  const total = expenses.reduce((s,e) => s + e.amount, 0) + rentTotal + kittyTotal;
+  const share = members.length ? total / members.length : 0;
+  const balances = {};
+  members.forEach(m => balances[m.id] = -share);
+  expenses.forEach(e => { balances[e.memberId] = (balances[e.memberId] || 0) + e.amount; });
+  if(rent){
+    Object.entries(rent.payments || {}).forEach(([mid, amt]) => {
+      balances[mid] = (balances[mid] || 0) + amt;
+    });
+  }
+  if(monthlyKitty){
+    Object.entries(monthlyKitty.payments || {}).forEach(([mid, amt]) => {
+      balances[mid] = (balances[mid] || 0) + amt;
+    });
+  }
+  return {total, share, balances};
+}
+
+function memberName(id){
+  const m = members.find(m => m.id === id);
+  return m ? m.name : '—';
+}
+
+/* ---- حسابي ---- */
+function populateMyAccountSelect(){
+  const sel = document.getElementById('myAccountSelect');
+  if(!sel) return;
+  const prev = sel.value;
+  sel.innerHTML = members.map(m => `<option value="${m.id}">${m.name}</option>`).join('');
+  if(members.some(m => String(m.id) === prev)) sel.value = prev;
+}
+
+function renderMyAccount(){
+  const box = document.getElementById('myAccountInfo');
+  const sel = document.getElementById('myAccountSelect');
+  if(!box || !sel) return;
+  if(members.length === 0){
+    box.innerHTML = '<div class="empty">أضيفوا أعضاء أول</div>';
+    return;
+  }
+  const memberId = Number(sel.value);
+  const m = members.find(x => x.id === memberId);
+  if(!m){ box.innerHTML = ''; return; }
+
+  const {share, balances} = computeBalances();
+  const kittyPaid = monthlyKitty ? (monthlyKitty.payments[m.id] || 0) : 0;
+  const rentPaid = rent ? (rent.payments[m.id] || 0) : 0;
+  const myExpenses = expenses.filter(e => e.memberId === m.id);
+  const expensesPaid = myExpenses.reduce((s,e) => s + e.amount, 0);
+  const totalPaid = kittyPaid + rentPaid + expensesPaid;
+  const bal = balances[m.id] || 0;
+  const balLabel = bal > 0.5 ? `له ${fmt(bal)}` : (bal < -0.5 ? `عليه ${fmt(Math.abs(bal))}` : 'متعادل');
+  const balClass = bal > 0.5 ? 'ok' : (bal < -0.5 ? 'late' : 'paid');
+
+  const expensesHtml = myExpenses.length ? myExpenses.map(e => `
+    <div class="exp-item">
+      <div class="mid">
+        <div class="desc">${escapeHtml(e.desc)}</div>
+      </div>
+      <div class="amt">${fmt(e.amount)}</div>
+      ${e.receipt ? `<button class="exp-receipt-btn" onclick="openReceipt(${e.id})" title="عرض صورة الفاتورة">🧾</button>` : ''}
+    </div>
+  `).join('') : '<div class="empty">ما سجّلت أي مصروف بعد</div>';
+
+  box.innerHTML = `
+    <div class="rent-box">
+      <div>
+        <div class="r-amt">${fmt(totalPaid)} ر.س</div>
+        <div class="r-sub">إجمالي اللي دفعه ${escapeHtml(m.name)} · نصيبه من الإجمالي ${fmt(share)}</div>
+      </div>
+      <span class="rent-badge ${balClass}">${balLabel}</span>
+    </div>
+    <div class="rent-members" style="margin-top:12px;">
+      <div class="rent-member-row"><span class="rm-name">القطة الشهرية</span><span class="rm-target">${fmt(kittyPaid)}</span></div>
+      <div class="rent-member-row"><span class="rm-name">الإيجار السنوي</span><span class="rm-target">${fmt(rentPaid)}</span></div>
+      <div class="rent-member-row"><span class="rm-name">مصاريفه</span><span class="rm-target">${fmt(expensesPaid)}</span></div>
+    </div>
+    <div class="rm-caption" style="margin-top:14px;">مصاريفه المسجّلة</div>
+    ${expensesHtml}
+  `;
+}
+
+/* ---- تذكيرات شخصية (تُحفظ على هالجهاز فقط) ---- */
+function getPersonalReminders(){
+  try{
+    return JSON.parse(localStorage.getItem('qatta_personal_reminders') || '[]');
+  }catch(e){ return []; }
+}
+function savePersonalReminders(list){
+  try{ localStorage.setItem('qatta_personal_reminders', JSON.stringify(list)); }catch(e){}
+}
+function addPersonalReminder(){
+  const text = document.getElementById('reminderText').value.trim();
+  const date = document.getElementById('reminderDate').value;
+  if(!text || !date){
+    showToast('اكتب نص التذكير واختر تاريخه');
+    return;
+  }
+  const list = getPersonalReminders();
+  list.push({id: Date.now(), text, date});
+  savePersonalReminders(list);
+  document.getElementById('reminderText').value = '';
+  document.getElementById('reminderDate').value = '';
+  renderReminders();
+  showToast('تم إضافة التذكير');
+}
+function deletePersonalReminder(id){
+  const list = getPersonalReminders().filter(r => r.id !== id);
+  savePersonalReminders(list);
+  renderReminders();
+}
+function renderReminders(){
+  const box = document.getElementById('reminderList');
+  if(!box) return;
+  const list = getPersonalReminders().sort((a,b) => a.date.localeCompare(b.date));
+  if(list.length === 0){
+    box.innerHTML = '<div class="empty">ما فيه تذكيرات شخصية</div>';
+    return;
+  }
+  const today = new Date(); today.setHours(0,0,0,0);
+  box.innerHTML = list.map(r => {
+    const d = new Date(r.date);
+    const diff = Math.round((d - today) / 86400000);
+    const dueLabel = d.toLocaleDateString('ar-SA-u-ca-gregory', {year:'numeric', month:'long', day:'numeric'});
+    let badge;
+    if(diff < 0) badge = `<span class="rent-badge late">فات</span>`;
+    else if(diff === 0) badge = `<span class="rent-badge soon">اليوم</span>`;
+    else badge = `<span class="rent-badge ok">بعد ${fmt(diff)} يوم</span>`;
+    return `
+      <div class="rent-member-row">
+        <span class="rm-name">${escapeHtml(r.text)}</span>
+        <span class="rm-target">${dueLabel}</span>
+        ${badge}
+        <button class="del" onclick="deletePersonalReminder(${r.id})">×</button>
+      </div>`;
+  }).join('');
+}
+function checkPersonalReminderNotify(){
+  if(!('Notification' in window) || Notification.permission !== 'granted') return;
+  const today = new Date(); today.setHours(0,0,0,0);
+  getPersonalReminders().forEach(r => {
+    const d = new Date(r.date);
+    if(d <= today){
+      new Notification('تذكير شخصي - قطة الاستراحة', {body: r.text});
+    }
+  });
+}
+
+function renderMajlisSeats(balances){
+  const majlis = document.getElementById('majlis');
+  majlis.querySelectorAll('.seat').forEach(s => s.remove());
+  majlis.querySelectorAll('.empty-hint').forEach(s => s.remove());
+
+  if(members.length === 0){
+    const hint = document.createElement('div');
+    hint.className = 'empty-hint';
+    hint.textContent = 'ما فيه أعضاء بعد — أضيفوهم بالأسفل';
+    majlis.appendChild(hint);
+    return;
+  }
+
+  const R = 165; // radius in px, relative to 420 box — scaled via % below
+  const n = members.length;
+  members.forEach((m, i) => {
+    const angle = (2*Math.PI * i / n) - Math.PI/2;
+    const x = 50 + 39*Math.cos(angle); // percent
+    const y = 50 + 39*Math.sin(angle);
+    const seat = document.createElement('div');
+    seat.className = 'seat';
+    seat.style.left = x + '%';
+    seat.style.top = y + '%';
+
+    const bal = balances[m.id] || 0;
+    const cls = bal > 0.5 ? 'pos' : (bal < -0.5 ? 'neg' : '');
+    seat.innerHTML = `
+      <div class="avatar ${cls}" title="${m.name}">
+        ${initials(m.name)}
+        <span class="tag">${m.name}</span>
+      </div>`;
+    majlis.appendChild(seat);
+  });
+}
+
+function renderMembers(){
+  const wrap = document.getElementById('memberChips');
+  wrap.innerHTML = '';
+  members.forEach(m => {
+    const chip = document.createElement('span');
+    chip.className = 'member-chip';
+    chip.innerHTML = `${m.name} <button onclick="removeMember(${m.id})">×</button>`;
+    wrap.appendChild(chip);
+  });
+
+  const sel = document.getElementById('expPayer');
+  const prev = sel.value;
+  sel.innerHTML = members.map(m => `<option value="${m.id}">${m.name}</option>`).join('');
+  if(members.some(m => String(m.id) === prev)) sel.value = prev;
+}
+
+function renderExpenses(){
+  const list = document.getElementById('expList');
+  if(expenses.length === 0){
+    list.innerHTML = '<div class="empty">ما فيه مصاريف مسجلة بعد</div>';
+    return;
+  }
+  list.innerHTML = expenses.slice().reverse().map(e => `
+    <div class="exp-item">
+      <div class="who">${initials(memberName(e.memberId))}</div>
+      <div class="mid">
+        <div class="desc">${e.desc}</div>
+        <div class="payer">دفعها ${memberName(e.memberId)}</div>
+      </div>
+      <div class="amt">${fmt(e.amount)}</div>
+      ${e.receipt ? `<button class="exp-receipt-btn" onclick="openReceipt(${e.id})" title="عرض صورة الفاتورة">🧾</button>` : ''}
+      <button class="del" onclick="removeExpense(${e.id})">×</button>
+    </div>
+  `).join('');
+}
+
+function renderTotals(total, share){
+  document.getElementById('totalAmt').textContent = fmt(total);
+  document.getElementById('perShare').textContent = 'نصيب الفرد: ' + fmt(share);
+}
+
+function renderAll(){
+  try{
+    const {total, share, balances} = computeBalances();
+    renderMajlisSeats(balances);
+    renderMembers();
+    populateMyAccountSelect();
+    renderMyAccount();
+    renderRent();
+    renderKitty();
+    renderExpenses();
+    renderTotals(total, share);
+    renderPolls();
+    renderAlerts();
+  }catch(e){
+    console.error('renderAll error:', e);
+  }
+}
+
+/* ---- alerts + optional browser notifications ---- */
+function computeAlerts(){
+  const alerts = [];
+  if(rent){
+    const diff = rentCountdown(rent.dueDate);
+    const paidTotal = Object.values(rent.payments || {}).reduce((s,v) => s+v, 0);
+    const complete = (rent.amount - paidTotal) <= 0.5;
+    if(!complete){
+      if(diff < 0) alerts.push({level:'late', text: `الإيجار السنوي متأخر ${fmt(Math.abs(diff))} يوم`});
+      else if(diff <= 30) alerts.push({level:'soon', text: `الإيجار السنوي مستحق خلال ${fmt(diff)} يوم`});
+    }
+  }
+  if(monthlyKitty){
+    const due = monthlyDueDate();
+    const today = new Date(); today.setHours(0,0,0,0);
+    const diff = Math.round((due - today) / 86400000);
+    const paidTotal = Object.values(monthlyKitty.payments || {}).reduce((s,v) => s+v, 0);
+    const complete = (monthlyKitty.amount - paidTotal) <= 0.5;
+    if(!complete){
+      if(diff < 0) alerts.push({level:'late', text: `القطة الشهرية متأخرة ${fmt(Math.abs(diff))} يوم`});
+      else if(diff <= 5) alerts.push({level:'soon', text: `القطة الشهرية مستحقة خلال ${fmt(diff)} يوم`});
+    }
+  }
+  return alerts;
+}
+
+function renderAlerts(){
+  const box = document.getElementById('alertBanner');
+  const alerts = computeAlerts();
+  if(alerts.length === 0){
+    box.style.display = 'none';
+    box.innerHTML = '';
+    return;
+  }
+  box.style.display = 'flex';
+  box.innerHTML = alerts.map(a => `<span class="alert-pill ${a.level}">⏰ ${a.text}</span>`).join('');
+}
+
+function exportExcel(){
+  if(window.__xlsxLoadFailed || typeof XLSX === 'undefined'){
+    showToast('تعذر تحميل مكتبة Excel — تأكد من الإنترنت');
+    return;
+  }
+  if(members.length === 0){
+    showToast('أضيفوا أعضاء أول قبل التصدير');
+    return;
+  }
+
+  const {total, share, balances} = computeBalances();
+  const rentPerShare = rent ? rent.amount / members.length : 0;
+  const kittyPerShare = monthlyKitty ? monthlyKitty.amount / members.length : 0;
+
+  const wb = XLSX.utils.book_new();
+
+  // ملخص الأعضاء
+  const summaryRows = members.map(m => {
+    const kittyPaid = monthlyKitty ? (monthlyKitty.payments[m.id] || 0) : 0;
+    const rentPaid = rent ? (rent.payments[m.id] || 0) : 0;
+    const expensesPaid = expenses.filter(e => e.memberId === m.id).reduce((s,e) => s + e.amount, 0);
+    const totalPaid = kittyPaid + rentPaid + expensesPaid;
+    return {
+      'الاسم': m.name,
+      'القطة الشهرية المدفوعة': kittyPaid,
+      'الإيجار المدفوع': rentPaid,
+      'المصاريف المدفوعة': expensesPaid,
+      'إجمالي المدفوع': totalPaid,
+      'نصيبه من الإجمالي': Math.round(share * 100) / 100,
+      'الرصيد (+ له / - عليه)': Math.round((balances[m.id] || 0) * 100) / 100
+    };
+  });
+  const wsSummary = XLSX.utils.json_to_sheet(summaryRows);
+  XLSX.utils.book_append_sheet(wb, wsSummary, 'ملخص الأعضاء');
+
+  // تفاصيل المصاريف
+  const expRows = expenses.length
+    ? expenses.map(e => ({ 'الوصف': e.desc, 'دفعها': memberName(e.memberId), 'المبلغ': e.amount }))
+    : [{ 'الوصف': 'لا يوجد مصاريف مسجلة', 'دفعها': '', 'المبلغ': '' }];
+  const wsExp = XLSX.utils.json_to_sheet(expRows);
+  XLSX.utils.book_append_sheet(wb, wsExp, 'تفاصيل المصاريف');
+
+  // تفاصيل الإيجار السنوي
+  if(rent){
+    const rentRows = members.map(m => ({
+      'الاسم': m.name,
+      'نصيبه من الإيجار': Math.round(rentPerShare * 100) / 100,
+      'المدفوع': rent.payments[m.id] || 0
+    }));
+    const wsRent = XLSX.utils.json_to_sheet(rentRows);
+    XLSX.utils.book_append_sheet(wb, wsRent, 'الإيجار السنوي');
+  }
+
+  // تفاصيل القطة الشهرية
+  if(monthlyKitty){
+    const kittyRows = members.map(m => ({
+      'الاسم': m.name,
+      'نصيبه من القطة الشهرية': Math.round(kittyPerShare * 100) / 100,
+      'المدفوع هالشهر': monthlyKitty.payments[m.id] || 0
+    }));
+    const wsKitty = XLSX.utils.json_to_sheet(kittyRows);
+    XLSX.utils.book_append_sheet(wb, wsKitty, 'القطة الشهرية');
+  }
+
+  const dateStr = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD
+  XLSX.writeFile(wb, `قطة_الاستراحة_${dateStr}.xlsx`);
+  showToast('تم تحميل ملف Excel');
+}
+
+function enableNotifications(){
+  if(!('Notification' in window)){
+    showToast('المتصفح ما يدعم تنبيهات الجهاز');
+    return;
+  }
+  Notification.requestPermission().then(perm => {
+    if(perm === 'granted'){
+      showToast('تم تفعيل التنبيهات على هالجهاز');
+      checkAndNotify();
+      checkPersonalReminderNotify();
+    } else {
+      showToast('ما تم منح إذن التنبيهات');
+    }
+  });
+}
+
+function checkAndNotify(){
+  if(!('Notification' in window) || Notification.permission !== 'granted') return;
+  computeAlerts().forEach(a => {
+    new Notification('قطة الاستراحة', {body: a.text});
+  });
+}
+
+/* ---- Firebase realtime sync ---- */
+const firebaseConfig = {
+  apiKey: "AIzaSyDPixXRNW_vN5e1bge5kmSVA6bMvQNSP50",
+  authDomain: "estraha-6da6e.firebaseapp.com",
+  databaseURL: "https://estraha-6da6e-default-rtdb.firebaseio.com",
+  projectId: "estraha-6da6e",
+  storageBucket: "estraha-6da6e.firebasestorage.app",
+  messagingSenderId: "840319837476",
+  appId: "1:840319837476:web:fd66c441156bf77f5ebfb1"
+};
+let db = null;
+let firebaseReady = false;
+let suppressNextPush = false;
+
+function setSyncStatus(state){
+  const el = document.getElementById('syncStatus');
+  if(!el) return;
+  if(state === 'ok'){ el.textContent = '● متزامن مع الأعضاء'; el.className = 'sync-status ok'; }
+  else if(state === 'busy'){ el.textContent = '● جاري الاتصال بقاعدة البيانات…'; el.className = 'sync-status busy'; }
+  else { el.textContent = '● غير متصل — تأكد من الإنترنت'; el.className = 'sync-status err'; }
+}
+
+function isEditingField(){
+  const a = document.activeElement;
+  return a && (a.tagName === 'INPUT' || a.tagName === 'SELECT' || a.tagName === 'TEXTAREA');
+}
+
+function initFirebase(){
+  if(window.__fbLoadFailed || typeof firebase === 'undefined'){
+    setSyncStatus('err');
+    showToast('تعذر تحميل مكتبة Firebase — تأكد من الإنترنت وجرب فتح الملف بمتصفح ثاني');
+    console.error('Firebase SDK لم يتم تحميله');
+    return;
+  }
+  try{
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.database();
+    firebaseReady = true;
+    setSyncStatus('busy');
+
+    // مؤشر اتصال حقيقي من Firebase نفسه
+    db.ref('.info/connected').on('value', snap => {
+      if(snap.val() === true){
+        setSyncStatus('ok');
+      } else {
+        setSyncStatus('busy');
+      }
+    });
+
+    db.ref('state').on('value', snap => {
+      const data = snap.val();
+      if(data && !isEditingField()){
+        members = data.members || [];
+        expenses = data.expenses || [];
+        rent = data.rent || null;
+        if(rent && !rent.payments) rent.payments = {};
+        monthlyKitty = data.monthlyKitty || null;
+        if(monthlyKitty && !monthlyKitty.payments) monthlyKitty.payments = {};
+        polls = (data.polls || []).map(p => ({
+          ...p,
+          options: (p.options || []).map(o => ({...o, votes: o.votes || []}))
+        }));
+        nextId = data.nextId || 1;
+        renderAll();
+      }
+    }, err => {
+      firebaseReady = false;
+      setSyncStatus('err');
+      console.error('Firebase read error:', err);
+      showToast('تعذر القراءة من قاعدة البيانات — تأكد من قواعد Rules');
+    });
+
+    // لو ما وصل رد خلال ٨ ثواني، فيه مشكلة اتصال فعلية
+    setTimeout(() => {
+      const el = document.getElementById('syncStatus');
+      if(el && el.classList.contains('busy')){
+        setSyncStatus('err');
+        showToast('تعذر الاتصال بقاعدة البيانات — تأكد من الإنترنت أو أي مانع إعلانات مفعّل');
+      }
+    }, 8000);
+  }catch(e){
+    firebaseReady = false;
+    setSyncStatus('err');
+    console.error('Firebase init error:', e);
+    showToast('خطأ بإعداد Firebase: ' + e.message);
+  }
+}
+
+function pushState(){
+  if(!firebaseReady || !db) return;
+  db.ref('state').set({members, expenses, rent, monthlyKitty, polls, nextId})
+    .catch(() => { setSyncStatus('err'); });
+}
+
+/* ---- share via code (works with no backend, used as backup) ---- */
+function showToast(msg){
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => el.classList.remove('show'), 2600);
+}
+
+function toggleTheme(){
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  setTheme(isDark ? 'light' : 'dark');
+}
+function setTheme(mode){
+  document.documentElement.setAttribute('data-theme', mode);
+  document.getElementById('themeToggle').textContent = mode === 'dark' ? '☀️' : '🌙';
+}
+function initTheme(){
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  setTheme(prefersDark ? 'dark' : 'light');
+}
+
+document.getElementById('memberInput').addEventListener('keydown', e => {
+  if(e.key === 'Enter') addMember();
+});
+document.getElementById('expAmount').addEventListener('keydown', e => {
+  if(e.key === 'Enter') addExpense();
+});
+
+initTheme();
+populateKittyDaySelect();
+renderAll();
+renderReminders();
+checkAndNotify();
+checkPersonalReminderNotify();
+initFirebase();
+</script>
+</body>
+</html>
